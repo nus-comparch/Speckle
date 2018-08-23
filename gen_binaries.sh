@@ -67,8 +67,8 @@ if [ "$compileFlag" = true ]; then
    # copy over the config file we will use to compile the benchmarks
    cp $BUILD_DIR/../${CONFIGFILE} $SPEC_DIR/config/${CONFIGFILE}
    cd $SPEC_DIR; . ./shrc; time runspec --config ${CONFIG} --size ${INPUT_TYPE} --action setup int
-#   cd $SPEC_DIR; . ./shrc; time runspec --config ${CONFIG} --size ${INPUT_TYPE} --action scrub int
-
+   # cd $SPEC_DIR; . ./shrc; time runspec --config ${CONFIG} --size ${INPUT_TYPE} --action scrub int	
+	
    if [ "$copyFlag" = true ]; then
       rm -rf $COPY_DIR
       mkdir -p $COPY_DIR
@@ -78,11 +78,15 @@ if [ "$compileFlag" = true ]; then
    # Do this for each input type.
    # assume the CPU2006 directories are clean. I've hard-coded the directories I'm going to copy out of
    for b in ${BENCHMARKS[@]}; do
+      echo "##############################################################################"
       echo ${b}
+     
       SHORT_EXE=${b##*.} # cut off the numbers ###.short_exe
       if [ $b == "483.xalancbmk" ]; then 
          SHORT_EXE=Xalan #WTF SPEC???
       fi
+
+      cd $SPEC_DIR; . ./shrc; time runspec --config=${CONFIG} --size=${INPUT_TYPE} --noreportable --tune=base --iterations=1 ${SHORT_EXE}
       BMK_DIR=$SPEC_DIR/benchspec/CPU2006/$b/run/run_base_${INPUT_TYPE}_${CONFIG}.0000;
       
       echo ""
@@ -122,6 +126,7 @@ fi
 # we could also just run through BUILD_DIR/CMD_FILE and run those...
 if [ "$runFlag" = true ]; then
 
+   echo "Running the binaries.."
    for b in ${BENCHMARKS[@]}; do
    
       cd $BUILD_DIR/${b}_${INPUT_TYPE}
