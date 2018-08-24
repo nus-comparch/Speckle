@@ -13,7 +13,6 @@ fi
 
 CONFIG=riscv
 CONFIGFILE=${CONFIG}.cfg
-RUN="spike pk -c "
 CMD_FILE=commands.txt
 INPUT_TYPE=test
 
@@ -139,12 +138,15 @@ if [ "$runFlag" = true ]; then
       IFS=$'\n' read -d '' -r -a commands < $BUILD_DIR/../commands/${b}.${INPUT_TYPE}.cmd
 
 
+      INPUTSET=1
       for input in "${commands[@]}"; do
       	if [[ ${input:0:1} != '#' ]]; then # allow us to comment out lines in the cmd files
 		echo "~~~Running ${b}"
+		RUN="spike --sift=${SHORT_EXE}_${INPUTSET}.sift pk "
 		echo "  ${RUN} ${SHORT_EXE}_base.${CONFIG} ${input}"
 		eval ${RUN} ${SHORT_EXE}_base.${CONFIG} ${input}
 	fi
+	INPUTSET=$((INPUTSET+1))
       done
 
 
@@ -153,5 +155,4 @@ if [ "$runFlag" = true ]; then
 
 fi
 
-echo ""
 echo "Done!"
