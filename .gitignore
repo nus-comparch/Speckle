@@ -1,4 +1,4 @@
 build/
 riscv-spec-test/
-OUTPUT-20180823/
-run-all.sh
+output/
+OUTPUT*/

@@ -2,6 +2,10 @@
 
 CONFIG=riscv
 INPUT_TYPE=test
+BUILD_DIR=${SPECKLE_HOME}/${CONFIG}-spec-${INPUT_TYPE}
+
+SIMULATOR=spike	# spike or rv8
+OUTPUT_LOC=${SPECKLE_HOME}/output/${SIMULATOR}
 
 print_error() {
 	echo "ERROR: bad options or arguments"
@@ -31,39 +35,50 @@ if [ $# -gt 0 ]; then
 		    	;;
 	esac
 else
-	echo "ERROR: bad options $1"
-	echo "  --benchmark [name] (run the specific benchmark) or --all (to run all the benchmarks)"
-	exit 1
+	print_error
 fi
 
-echo $BENCHMARKS
-BASE_DIR=$PWD/${CONFIG}-spec-${INPUT_TYPE}
 for b in ${BENCHMARKS[@]}; do
 
-   echo " -== ${b} ==-"
-   mkdir -p ${BASE_DIR}/OUTPUT
+	if [ ! -d ${BUILD_DIR}/${b} ]; then
+		print_error
+	fi
 
-   cd ${BASE_DIR}/${b}
-   SHORT_EXE=${b##*.} # cut off the numbers ###.short_exe
-   if [ $b == "483.xalancbmk" ]; then 
-      SHORT_EXE=Xalan #WTF SPEC???
-   fi
-   
-   # read the command file
-   IFS=$'\n' read -d '' -r -a commands < ${BASE_DIR}/../commands/${b}.${INPUT_TYPE}.cmd
+	echo "Running riscv simulator ($SIMULATOR) for $b ...."
+   	OUTPUT_DIR=${OUTPUT_LOC}/${b}
+   	mkdir -p ${OUTPUT_DIR}
+	
+	cd ${BUILD_DIR}/${b}
+   	SHORT_EXE=${b##*.} # cut off the numbers ###.short_exe
+  
+	# handle benchmarks that don't conform to the naming convention
+   	if [ $b == "482.sphinx3" ]; then SHORT_EXE=sphinx_livepretend; fi
+   	if [ $b == "483.xalancbmk" ]; then SHORT_EXE=Xalan; fi  
 
-   # run each workload
-   count=0
-   for input in "${commands[@]}"; do
-      if [[ ${input:0:1} != '#' ]]; then # allow us to comment out lines in the cmd files
-	 RUN="spike --sift=${SHORT_EXE}-${count}.sift pk "
-	 cmd="${RUN} ${SHORT_EXE} ${input} 2> ${BASE_DIR}/OUTPUT/${SHORT_EXE}-${count}.err  > ${BASE_DIR}/OUTPUT/${SHORT_EXE}-${count}.out"
-         echo "[Executing] ${cmd}"
-         #eval ${cmd}
-         ((count++))
-      fi
-   done
-   echo ""
+   	# read the command file
+   	IFS=$'\n' read -d '' -r -a commands < ${SPECKLE_HOME}/commands/${b}.${INPUT_TYPE}.cmd
+
+   	# run each workload
+   	count=1
+   	for input in "${commands[@]}"; do
+      		if [[ ${input:0:1} != '#' ]]; then # allow us to comment out lines in the cmd files
+	 		
+			if [[ $SIMULATOR == 'rv8' ]]; then
+				RUN="$RV8_HOME/build/linux_x86_64/bin/rv-jit --log-sift --log-sift-filename ${SHORT_EXE}-${count}.sift"
+			else
+				RUN="spike --sift=${SHORT_EXE}-${count}.sift pk "
+	 		fi
+
+			cmd="${RUN} ${SHORT_EXE} ${input} 2> ${OUTPUT_DIR}/${SHORT_EXE}-${count}.err  > ${OUTPUT_DIR}/${SHORT_EXE}-${count}.out" 
+			echo "${cmd}"
+        	 	
+			eval ${cmd}
+	 		[ -f rv8.bb ] && mv rv8.bb $OUTPUT_DIR/${SHORT_EXE}-${count}.bb
+			[ -f ${SHORT_EXE}-${count}.sift ] && mv ${SHORT_EXE}-${count}.sift $OUTPUT_DIR/${SHORT_EXE}-${count}.sift
+         		((count++))
+      		fi
+   	done
+   	echo ""
 
 done
 
