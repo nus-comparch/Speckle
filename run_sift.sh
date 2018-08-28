@@ -2,10 +2,10 @@
 
 CONFIG=riscv
 INPUT_TYPE=test
-BUILD_DIR=${SPECKLE_HOME}/${CONFIG}-spec-${INPUT_TYPE}
+BUILD_DIR=${SPECKLE_ROOT}/${CONFIG}-spec-${INPUT_TYPE}
 
 SIMULATOR=spike	# spike or rv8
-OUTPUT_LOC=${SPECKLE_HOME}/output/${SIMULATOR}
+OUTPUT_LOC=${SPECKLE_ROOT}/output/${SIMULATOR}
 
 print_error() {
 	echo "ERROR: bad options or arguments"
@@ -37,10 +37,11 @@ if [ $# -gt 0 ]; then
 else
 	print_error
 fi
-
+echo "$BENCHMARKS"
 for b in ${BENCHMARKS[@]}; do
 
 	if [ ! -d ${BUILD_DIR}/${b} ]; then
+		echo "${BUILD_DIR}/${b}"
 		print_error
 	fi
 
@@ -56,7 +57,7 @@ for b in ${BENCHMARKS[@]}; do
    	if [ $b == "483.xalancbmk" ]; then SHORT_EXE=Xalan; fi  
 
    	# read the command file
-   	IFS=$'\n' read -d '' -r -a commands < ${SPECKLE_HOME}/commands/${b}.${INPUT_TYPE}.cmd
+   	IFS=$'\n' read -d '' -r -a commands < ${SPECKLE_ROOT}/commands/${b}.${INPUT_TYPE}.cmd
 
    	# run each workload
    	count=1
