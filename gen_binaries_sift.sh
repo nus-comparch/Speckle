@@ -135,30 +135,31 @@ if [ "$runFlag" = true ]; then
 
    echo "Running the binaries.."
    for b in ${BENCHMARKS[@]}; do
-   
-      cd $BUILD_DIR/${b}_${INPUT_TYPE}
-      SHORT_EXE=${b##*.} # cut off the numbers ###.short_exe
-      # handle benchmarks that don't conform to the naming convention
-      if [ $b == "482.sphinx3" ]; then SHORT_EXE=sphinx_livepretend; fi
-      if [ $b == "483.xalancbmk" ]; then SHORT_EXE=Xalan; fi
+  
+  	if [[ -d $BUILD_DIR/${b}_${INPUT_TYPE} ]]; then
+      	
+		cd $BUILD_DIR/${b}_${INPUT_TYPE}
+      		SHORT_EXE=${b##*.} # cut off the numbers ###.short_exe
       
-      # read the command file
-      IFS=$'\n' read -d '' -r -a commands < $BUILD_DIR/../commands/${b}.${INPUT_TYPE}.cmd
+      		# handle benchmarks that don't conform to the naming convention
+     	 	if [ $b == "482.sphinx3" ]; then SHORT_EXE=sphinx_livepretend; fi
+      		if [ $b == "483.xalancbmk" ]; then SHORT_EXE=Xalan; fi
+      
+      		# read the command file
+      		IFS=$'\n' read -d '' -r -a commands < $BUILD_DIR/../commands/${b}.${INPUT_TYPE}.cmd
 
-
-      INPUTSET=1
-      for input in "${commands[@]}"; do
-      	if [[ ${input:0:1} != '#' ]]; then # allow us to comment out lines in the cmd files
-		echo "~~~Running ${b}"
-		RUN="spike --sift=${SHORT_EXE}_${INPUTSET}.sift pk "
-		echo "  ${RUN} ${SHORT_EXE}_base.${CONFIG} ${input}"
-		eval ${RUN} ${SHORT_EXE}_base.${CONFIG} ${input}
+      		INPUTSET=1
+      		for input in "${commands[@]}"; do
+      			if [[ ${input:0:1} != '#' ]]; then # allow us to comment out lines in the cmd files
+				echo "~~~Running ${b}"
+				RUN="spike --sift=${SHORT_EXE}_${INPUTSET}.sift pk "
+				echo "  ${RUN} ${SHORT_EXE}_base.${CONFIG} ${input}"
+				eval ${RUN} ${SHORT_EXE}_base.${CONFIG} ${input}
+			fi
+			INPUTSET=$((INPUTSET+1))
+      		done
 	fi
-	INPUTSET=$((INPUTSET+1))
-      done
 
-
-   
    done
 
 fi
