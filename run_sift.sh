@@ -12,15 +12,20 @@ print_error() {
 	echo " "
 	echo "USAGE: ./run_sift.sh [--benchmark <bname>][--all]"
 	echo " --benchmark <bname> : to run the specific benchmark"
-	echo "      bname can be 400.perlbench, 401.bzip2, 403.gcc, 429.mcf, 445.gobmk, 456.hmmer, 458.sjeng, 462.libquantum, 464.h264ref, 471.omnetpp, 473.astar or 483.xalancbmk"
+	echo "      bname can be "
+	echo "		(INT) 400.perlbench, 401.bzip2, 403.gcc, 429.mcf, 445.gobmk, 456.hmmer, 458.sjeng, 462.libquantum, 464.h264ref, 471.omnetpp, 473.astar, 483.xalancbmk"
+	echo " 		(FP)  433.milc, 444.namd, 470.lbm, 998.specrand"
 	echo " --all : to run all the benchmarks" 
+	echo "Example: ./run_sift.sh --benchmark 429.mcf"
 	exit 1
 }
 
 if [ $# -gt 0 ]; then
 	case "$1" in
 		--all) 
-			BENCHMARKS=(400.perlbench 401.bzip2 403.gcc 429.mcf 445.gobmk 456.hmmer 458.sjeng 462.libquantum 464.h264ref 471.omnetpp 473.astar 483.xalancbmk)
+			# BENCHMARKS=(433.milc 444.namd 470.lbm 998.specrand)
+			# BENCHMARKS=(400.perlbench 401.bzip2 403.gcc 429.mcf 445.gobmk 456.hmmer 458.sjeng 462.libquantum 464.h264ref 471.omnetpp 473.astar 483.xalancbmk)
+			BENCHMARKS=(400.perlbench 401.bzip2 403.gcc 429.mcf 445.gobmk 456.hmmer 458.sjeng 462.libquantum 464.h264ref 471.omnetpp 473.astar 483.xalancbmk 433.milc 444.namd 470.lbm 998.specrand)
 	    		;;
 		--benchmark)
 	     		if [ -z $2 ]; then
